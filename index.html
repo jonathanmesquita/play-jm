@@ -4,141 +4,179 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Play JM | Sapo Pixelado — jogos e pixel art</title>
-  <meta name="description" content="Jogos e pixel art de Jonathan Mesquita, feitos aos poucos. Hoje: Arriba Jump, no ar. O resto está chegando." />
+  <meta name="description" content="Jogos e pixel art de Jonathan Mesquita, feitos aos poucos. No ar: Arriba Jump e JJ — CONTINUE COMIGO. O resto está chegando." />
   <link rel="canonical" href="https://play.jm.dev.br/" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Play JM | Sapo Pixelado" />
   <meta property="og:description" content="Jogos e pixel art de Jonathan Mesquita, feitos aos poucos." />
   <meta property="og:url" content="https://play.jm.dev.br/" />
-  <meta name="theme-color" content="#15121a" />
+  <meta name="theme-color" content="#1b1d1a" />
   <link rel="icon" href="/assets/icons/favicon.ico" sizes="16x16 32x32 48x48 64x64" />
   <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
   <link rel="preload" href="/assets/fonts/press-start-2p-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/assets/css/style.css" />
 </head>
 <body>
-  <a class="skip" href="#jogos">Pular para os jogos</a>
+  <a class="skip" href="#catalogo">Pular para os jogos</a>
 
   <header class="topo">
-    <p class="marca">Play JM</p>
+    <h1 class="marca">Play JM</h1>
+    <p class="sub">Sapo Pixelado · jogos e pixel art</p>
     <a class="voltar" href="https://jm.dev.br">← Software em jm.dev.br</a>
   </header>
 
   <main id="main">
-    <section class="hero" aria-labelledby="titulo">
-      <p class="kicker">Sapo Pixelado</p>
-      <h1 id="titulo">Jogos e<br />pixel art</h1>
-      <p class="lead">
-        A área criativa de Jonathan Mesquita: jogos pequenos e arte em pixel, feitos aos poucos.
-        É hobby, e nada aqui tem pressa.
-      </p>
+    <!-- Destaque: o jogo no ar mais conhecido -->
+    <section class="destaque" aria-labelledby="t-destaque">
+      <div class="destaque-texto">
+        <p class="kicker">Jogo em destaque</p>
+        <h2 id="t-destaque">Arriba Jump</h2>
+        <p class="meta">
+          <span class="selo selo-ok">No ar</span>
+          <span>2026 · Plataforma · Runner</span>
+        </p>
+        <p class="desc">
+          Corrida e pulo em pixel art por cenas de São Paulo, da Avenida Paulista à praia.
+          Feito só com HTML, CSS e JavaScript, sem motor e sem framework.
+        </p>
+        <p class="acoes">
+          <a class="botao botao-claro" href="https://arriba-jump.jm.dev.br" rel="noopener" aria-label="Jogar Arriba Jump">▶ Jogar</a>
+          <a class="botao botao-vazio" href="https://github.com/jonathanmesquita/arriba-jump" rel="noopener">Código</a>
+        </p>
+      </div>
+      <div class="destaque-arte">
+        <img
+          src="/assets/img/games/arriba-jump.webp"
+          width="640"
+          height="250"
+          alt="Arriba Jump: o personagem de poncho verde e sombrero pula obstáculos na Avenida Paulista, em pixel art."
+        />
+      </div>
     </section>
 
-    <section id="jogos" class="jogos" aria-labelledby="titulo-jogos">
-      <h2 id="titulo-jogos">Jogos</h2>
+    <!-- Catálogo: os filtros são só CSS (rádios), então o site continua sem JavaScript -->
+    <div id="catalogo" class="catalogo">
+      <div class="filtros" role="radiogroup" aria-label="Filtrar jogos">
+        <input type="radio" name="filtro" id="f-todos" checked />
+        <label for="f-todos">Todos</label>
+        <input type="radio" name="filtro" id="f-live" />
+        <label for="f-live">No ar</label>
+        <input type="radio" name="filtro" id="f-plataforma" />
+        <label for="f-plataforma">Plataforma</label>
+        <input type="radio" name="filtro" id="f-visual-novel" />
+        <label for="f-visual-novel">Visual novel</label>
+        <input type="radio" name="filtro" id="f-locked" />
+        <label for="f-locked">Em breve</label>
+      </div>
 
-      <ul class="grade">
-        <li>
-          <article class="cartao">
-            <img
-              class="capa"
-              src="/assets/img/games/arriba-jump.webp"
-              width="640"
-              height="250"
-              alt="Arriba Jump: o personagem de poncho verde e sombrero pula obstáculos na Avenida Paulista, em pixel art."
-              loading="lazy"
-            />
-            <div class="corpo">
-              <p class="selo selo-ok">No ar</p>
-              <h3>Arriba Jump</h3>
-              <ul class="etiquetas" aria-label="Gêneros">
-                <li>Plataforma</li>
-                <li>Runner</li>
-                <li>Pixel art</li>
-              </ul>
-              <p>
-                Corrida e pulo em pixel art por cenas de São Paulo, da Avenida Paulista à praia.
-                Feito só com HTML, CSS e JavaScript, sem motor e sem framework.
-              </p>
-              <p class="acoes">
-                <a class="botao" href="https://arriba-jump.jm.dev.br" rel="noopener" aria-label="Jogar Arriba Jump">Jogar</a>
-                <a class="link" href="https://github.com/jonathanmesquita/arriba-jump" rel="noopener">Código</a>
-              </p>
-            </div>
-          </article>
-        </li>
+      <section class="fileira" aria-labelledby="t-fileira-1">
+        <h2 id="t-fileira-1">Em destaque</h2>
+        <ul class="trilho">
+          <li class="titulo com-rank" data-tags="live plataforma runner">
+            <span class="rank" aria-hidden="true">1</span>
+            <article class="cartao" aria-labelledby="t-arriba">
+              <img
+                class="arte"
+                src="/assets/img/games/arriba-jump.webp"
+                width="640"
+                height="250"
+                alt=""
+                loading="lazy"
+              />
+              <div class="sobre">
+                <p class="selo selo-ok">No ar</p>
+                <h3 id="t-arriba">Arriba Jump</h3>
+                <ul class="etiquetas" aria-label="Gêneros">
+                  <li>Plataforma</li>
+                  <li>Runner</li>
+                  <li>Pixel art</li>
+                </ul>
+                <p class="acoes">
+                  <a class="botao botao-claro" href="https://arriba-jump.jm.dev.br" rel="noopener" aria-label="Jogar Arriba Jump">▶ Jogar</a>
+                </p>
+              </div>
+            </article>
+          </li>
 
-        <li>
-          <article class="cartao trancado" aria-labelledby="t-dossie">
-            <div class="capa capa-trancada" aria-hidden="true">
-              <svg class="cadeado" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
-                <path d="M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1Zm2 0h2V5a1 1 0 0 0-2 0v2Z" fill="currentColor" fill-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="corpo">
-              <p class="selo">Em breve</p>
-              <h3 id="t-dossie">Dossiê 92</h3>
-            </div>
-          </article>
-        </li>
+          <li class="titulo com-rank" data-tags="live visual-novel">
+            <span class="rank" aria-hidden="true">2</span>
+            <article class="cartao" aria-labelledby="t-jj">
+              <div class="arte arte-grade" aria-hidden="true">
+                <svg class="icone" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
+                  <path d="M4 2h2v1H4ZM4 3h3v1H4ZM4 4h4v1H4ZM4 5h5v1H4ZM4 6h6v1H4ZM4 7h7v1H4ZM4 8h7v1H4ZM4 9h6v1H4ZM4 10h5v1H4ZM4 11h4v1H4ZM4 12h3v1H4ZM4 13h2v1H4Z" fill="currentColor" />
+                </svg>
+              </div>
+              <div class="sobre">
+                <p class="selo selo-ok">No ar</p>
+                <h3 id="t-jj">JJ — CONTINUE COMIGO</h3>
+                <ul class="etiquetas" aria-label="Gêneros">
+                  <li>Visual novel</li>
+                  <li>Pixel art</li>
+                  <li>Godot 4</li>
+                </ul>
+                <p class="nota">Acesso com senha.</p>
+                <p class="acoes">
+                  <a class="botao botao-claro" href="https://jj-continue-comigo.jm.dev.br" rel="noopener" aria-label="Jogar JJ — CONTINUE COMIGO">▶ Jogar</a>
+                </p>
+              </div>
+            </article>
+          </li>
+        </ul>
+      </section>
 
-        <li>
-          <article class="cartao" aria-labelledby="t-jj">
-            <div class="capa capa-trancada" aria-hidden="true">
-              <svg class="cadeado" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
-                <path d="M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1Zm2 0h2V5a1 1 0 0 0-2 0v2Z" fill="currentColor" fill-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="corpo">
-              <p class="selo selo-ok">No ar</p>
-              <h3 id="t-jj">JJ — CONTINUE COMIGO</h3>
-              <ul class="etiquetas" aria-label="Gêneros">
-                <li>Visual novel</li>
-                <li>Pixel art</li>
-                <li>Godot 4</li>
-              </ul>
-              <p>Visual novel em pixel art, feita em Godot 4. O acesso é com senha.</p>
-              <p class="acoes">
-                <a class="botao" href="https://jj-continue-comigo.jm.dev.br" rel="noopener" aria-label="Jogar JJ — CONTINUE COMIGO">Jogar</a>
-              </p>
-            </div>
-          </article>
-        </li>
+      <section class="fileira" aria-labelledby="t-fileira-2">
+        <h2 id="t-fileira-2">Em breve</h2>
+        <ul class="trilho">
+          <li class="titulo" data-tags="locked plataforma">
+            <article class="cartao trancado" aria-labelledby="t-caetano">
+              <div class="arte arte-grade" aria-hidden="true">
+                <svg class="icone" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
+                  <path d="M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1Zm2 0h2V5a1 1 0 0 0-2 0v2Z" fill="currentColor" fill-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="sobre">
+                <p class="selo">Em desenvolvimento</p>
+                <h3 id="t-caetano">Caetano: Entre Mundos</h3>
+                <ul class="etiquetas" aria-label="Gêneros">
+                  <li>Plataforma 2D</li>
+                  <li>Pixel art</li>
+                  <li>Godot 4</li>
+                </ul>
+              </div>
+            </article>
+          </li>
 
-        <li>
-          <article class="cartao trancado" aria-labelledby="t-caetano">
-            <div class="capa capa-trancada" aria-hidden="true">
-              <svg class="cadeado" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
-                <path d="M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1Zm2 0h2V5a1 1 0 0 0-2 0v2Z" fill="currentColor" fill-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="corpo">
-              <p class="selo">Em desenvolvimento</p>
-              <h3 id="t-caetano">Caetano: Entre Mundos</h3>
-              <ul class="etiquetas" aria-label="Gêneros">
-                <li>Plataforma 2D</li>
-                <li>Pixel art</li>
-                <li>Godot 4</li>
-              </ul>
-            </div>
-          </article>
-        </li>
+          <li class="titulo" data-tags="locked">
+            <article class="cartao trancado" aria-labelledby="t-dossie">
+              <div class="arte arte-grade" aria-hidden="true">
+                <svg class="icone" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
+                  <path d="M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1Zm2 0h2V5a1 1 0 0 0-2 0v2Z" fill="currentColor" fill-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="sobre">
+                <p class="selo">Em breve</p>
+                <h3 id="t-dossie">Dossiê 92</h3>
+              </div>
+            </article>
+          </li>
 
-        <li>
-          <article class="cartao trancado" aria-labelledby="t-jogo3">
-            <div class="capa capa-trancada" aria-hidden="true">
-              <svg class="cadeado" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
-                <path d="M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1Zm2 0h2V5a1 1 0 0 0-2 0v2Z" fill="currentColor" fill-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="corpo">
-              <p class="selo">Em breve</p>
-              <h3 id="t-jogo3">Jogo 3</h3>
-            </div>
-          </article>
-        </li>
-      </ul>
-    </section>
+          <li class="titulo" data-tags="locked">
+            <article class="cartao trancado" aria-labelledby="t-jogo3">
+              <div class="arte arte-grade" aria-hidden="true">
+                <svg class="icone" viewBox="0 0 16 16" width="64" height="64" shape-rendering="crispEdges" focusable="false">
+                  <path d="M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1Zm2 0h2V5a1 1 0 0 0-2 0v2Z" fill="currentColor" fill-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="sobre">
+                <p class="selo">Em breve</p>
+                <h3 id="t-jogo3">Jogo 3</h3>
+              </div>
+            </article>
+          </li>
+        </ul>
+      </section>
+    </div>
   </main>
 
   <footer class="rodape">
