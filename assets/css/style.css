@@ -1,8 +1,14 @@
 /*
- * Play JM — estilo único. Cores só por token; cada par texto × fundo foi medido
- * (ink/fundo 15,7 · muted/fundo 8,9 · verde/fundo 10,5 · laranja/fundo 8,8 ·
- * texto escuro sobre verde 9,4 · borda de controle sobre o cartão 4,5).
- * Sem script e sem estilo dentro do HTML, para a CSP poder ficar fechada.
+ * Play JM — estilo único. A estrutura segue o catálogo do portfólio (destaque, filtros em pílula,
+ * fileiras, cartões, títulos trancados) e as cores são as do portfólio; o que é próprio daqui é o
+ * pixel: fonte Press Start 2P nos títulos, bordas retas e sombra dura, sem canto arredondado.
+ *
+ * Contraste medido (texto × fundo): creme/tinta 14,7 · creme/superfície 12,9 · apagado/tinta 9,6 ·
+ * apagado/superfície 8,4 · argila-sobre-tinta/tinta 6,0 · argila-sobre-tinta/superfície 5,2 ·
+ * texto escuro sobre argila (selo "No ar") 6,0 · borda de controle/tinta 5,5 · /superfície 4,8.
+ *
+ * Sem script e sem estilo dentro do HTML, para a CSP poder ficar fechada. Os filtros são rádios
+ * nativos + :has(), então funcionam por teclado e sem JavaScript.
  */
 
 @font-face {
@@ -13,21 +19,28 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Inter Variable";
+  src: url("/assets/fonts/inter-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
 
-  --fundo: #15121a;
-  --superficie: #211c2b;
-  --ink: #f3ecdc;
-  --muted: #b9b0c8;
-  --verde: #7ed957;
-  --sobre-verde: #10230a;
-  --laranja: #ff9a3c;
-  --linha: #3a3248;
-  --linha-forte: #8a7fa3;
+  --tinta: #1b1d1a;
+  --superficie: #262824;
+  --creme: #f2eee6;
+  --apagado: #c9c2b6;
+  --argila: #a66a4c;
+  --argila-sobre-tinta: #c48d6e;
+  --borda: #8e9491;
+  --linha: rgba(242, 238, 230, 0.16);
 
   --pixel: "Press Start 2P", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --texto: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --gutter: clamp(16px, 4vw, 40px);
 }
 
@@ -38,13 +51,17 @@
 }
 
 html {
-  background: var(--fundo);
+  background: var(--tinta);
   scroll-behavior: smooth;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  * {
+    transition: none !important;
   }
 }
 
@@ -53,20 +70,19 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--fundo);
-  color: var(--ink);
+  background: var(--tinta);
+  color: var(--creme);
   font-family: var(--texto);
   font-size: 1.0625rem;
   line-height: 1.6;
 }
 
 a {
-  color: var(--verde);
+  color: var(--argila-sobre-tinta);
 }
 
-a:focus-visible,
-.botao:focus-visible {
-  outline: 3px solid var(--laranja);
+:focus-visible {
+  outline: 3px solid var(--argila-sobre-tinta);
   outline-offset: 3px;
 }
 
@@ -75,8 +91,8 @@ a:focus-visible,
   left: var(--gutter);
   top: -4rem;
   padding: 0.6rem 1rem;
-  background: var(--verde);
-  color: var(--sobre-verde);
+  background: var(--creme);
+  color: var(--tinta);
   font-weight: 700;
   z-index: 10;
 }
@@ -90,9 +106,8 @@ a:focus-visible,
 .topo {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.5rem;
+  align-items: baseline;
+  gap: 0.5rem 1.25rem;
   padding: 1.25rem var(--gutter);
   border-bottom: 2px solid var(--linha);
 }
@@ -100,17 +115,25 @@ a:focus-visible,
 .marca {
   margin: 0;
   font-family: var(--pixel);
-  font-size: 0.875rem;
-  color: var(--verde);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--argila-sobre-tinta);
+}
+
+.sub {
+  margin: 0;
+  color: var(--apagado);
+  font-size: 0.9375rem;
 }
 
 .voltar {
-  color: var(--muted);
+  margin-left: auto;
+  color: var(--apagado);
   text-underline-offset: 4px;
 }
 
 .voltar:hover {
-  color: var(--ink);
+  color: var(--creme);
 }
 
 /* ---------- conteúdo ---------- */
@@ -118,115 +141,260 @@ a:focus-visible,
 main {
   flex: 1;
   width: 100%;
-  max-width: 72rem;
+  max-width: 76rem;
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: clamp(1.5rem, 4vw, 2.5rem) var(--gutter) clamp(3rem, 8vw, 5rem);
 }
 
-.hero {
-  padding: clamp(3rem, 9vw, 6rem) 0 clamp(2rem, 6vw, 4rem);
+/* ---------- destaque ---------- */
+
+.destaque {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: clamp(1.25rem, 4vw, 3rem);
+  align-items: center;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background: var(--superficie);
+  border: 2px solid var(--borda);
+  box-shadow: 6px 6px 0 var(--argila);
 }
 
 .kicker {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   font-family: var(--pixel);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  color: var(--laranja);
-}
-
-h1 {
-  margin: 0;
-  font-family: var(--pixel);
-  font-weight: 400;
-  font-size: clamp(1.75rem, 7vw, 3.5rem);
-  line-height: 1.3;
-}
-
-.lead {
-  max-width: 38rem;
-  margin: 1.75rem 0 0;
-  color: var(--muted);
-  font-size: 1.1875rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--argila-sobre-tinta);
 }
 
 h2 {
-  margin: 0 0 1.5rem;
+  margin: 0;
   font-family: var(--pixel);
   font-weight: 400;
-  font-size: 1rem;
-  color: var(--verde);
+  font-size: clamp(1.5rem, 5vw, 2.75rem);
+  line-height: 1.3;
 }
 
-.jogos {
-  padding-bottom: clamp(3rem, 8vw, 5rem);
-}
-
-.grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-  align-items: start;
-  gap: 1.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cartao {
+.meta {
   display: flex;
-  flex-direction: column;
-  background: var(--superficie);
-  border: 2px solid var(--linha-forte);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin: 1.25rem 0 0;
+  color: var(--apagado);
+  font-size: 0.9375rem;
 }
 
-.capa {
+.desc {
+  max-width: 34rem;
+  margin: 1rem 0 0;
+  color: var(--creme);
+}
+
+.destaque-arte img {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 64 / 25;
   object-fit: cover;
-  border-bottom: 2px solid var(--linha-forte);
+  border: 2px solid var(--borda);
 }
 
-.corpo {
+/* ---------- filtros (rádios nativos, sem JavaScript) ---------- */
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: clamp(1.75rem, 5vw, 2.5rem) 0 clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.filtros input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.filtros label {
+  padding: 0.55rem 1.1rem;
+  border: 2px solid var(--borda);
+  background: transparent;
+  color: var(--apagado);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.filtros label:hover {
+  color: var(--creme);
+  border-color: var(--creme);
+}
+
+.filtros input:checked + label {
+  background: var(--creme);
+  border-color: var(--creme);
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+.filtros input:focus-visible + label {
+  outline: 3px solid var(--argila-sobre-tinta);
+  outline-offset: 3px;
+}
+
+/* Cada filtro esconde o que não casa com ele; a fileira sem nenhum título visível também some. */
+.catalogo:has(#f-live:checked) .titulo:not([data-tags~="live"]),
+.catalogo:has(#f-plataforma:checked) .titulo:not([data-tags~="plataforma"]),
+.catalogo:has(#f-visual-novel:checked) .titulo:not([data-tags~="visual-novel"]),
+.catalogo:has(#f-locked:checked) .titulo:not([data-tags~="locked"]),
+.catalogo:has(#f-live:checked) .fileira:not(:has([data-tags~="live"])),
+.catalogo:has(#f-plataforma:checked) .fileira:not(:has([data-tags~="plataforma"])),
+.catalogo:has(#f-visual-novel:checked) .fileira:not(:has([data-tags~="visual-novel"])),
+.catalogo:has(#f-locked:checked) .fileira:not(:has([data-tags~="locked"])) {
+  display: none;
+}
+
+/* O numeral é a posição na fileira "Em destaque"; filtrado, ele deixaria de fazer sentido. */
+.catalogo:not(:has(#f-todos:checked)) .rank {
+  display: none;
+}
+
+.catalogo:not(:has(#f-todos:checked)) .com-rank {
+  padding-left: 0;
+}
+
+/* ---------- fileiras e cartões ---------- */
+
+.fileira {
+  margin-bottom: clamp(2rem, 6vw, 3.5rem);
+}
+
+.fileira > h2 {
+  margin-bottom: 1.5rem;
+  font-size: clamp(0.9375rem, 2.5vw, 1.125rem);
+  color: var(--creme);
+}
+
+.trilho {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
+  gap: 1.75rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.titulo {
+  position: relative;
+  display: flex;
+}
+
+.com-rank {
+  padding-left: 4.75rem;
+}
+
+/* Numeral grande e só com contorno, como no catálogo do portfólio. */
+.rank {
+  position: absolute;
+  left: -0.2rem;
+  bottom: -0.35rem;
+  z-index: 0;
+  font-family: var(--pixel);
+  font-size: 5.5rem;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(196, 141, 110, 0.55);
+  user-select: none;
+  pointer-events: none;
+}
+
+.cartao {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  background: var(--superficie);
+  border: 2px solid var(--borda);
+}
+
+.cartao:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--argila);
+  transition: transform 0.12s steps(2), box-shadow 0.12s steps(2);
+}
+
+.arte {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 64 / 25;
+  object-fit: cover;
+  border-bottom: 2px solid var(--borda);
+}
+
+.arte-grade {
+  display: grid;
+  place-items: center;
+  background-color: var(--tinta);
+  background-image:
+    linear-gradient(var(--linha) 1px, transparent 1px),
+    linear-gradient(90deg, var(--linha) 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: var(--borda);
+}
+
+.icone {
+  image-rendering: pixelated;
+}
+
+.sobre {
+  display: flex;
   flex: 1;
-  padding: 1.25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.1rem 1.25rem 1.25rem;
 }
 
 h3 {
-  margin: 0.25rem 0 0.75rem;
+  margin: 0.15rem 0 0.7rem;
   font-family: var(--pixel);
   font-weight: 400;
-  font-size: 0.9375rem;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  line-height: 1.55;
 }
 
-.corpo p {
-  margin: 0 0 1rem;
-  color: var(--muted);
+.nota {
+  margin: 0 0 0.9rem;
+  color: var(--apagado);
+  font-size: 0.9375rem;
 }
+
+/* ---------- selos, etiquetas e botões ---------- */
 
 .selo {
-  align-self: flex-start;
   margin: 0 0 0.5rem;
   padding: 0.2rem 0.6rem;
-  border: 2px solid var(--linha-forte);
+  border: 2px solid var(--borda);
   font-family: var(--pixel);
   font-size: 0.625rem;
   line-height: 1.6;
-  color: var(--muted);
+  color: var(--apagado);
 }
 
-/* "No ar" usa o verde como fundo, com texto escuro (9,4). */
-.corpo .selo-ok {
-  background: var(--verde);
-  border-color: var(--verde);
-  color: var(--sobre-verde);
+/* "No ar": texto escuro sobre argila clara (6,0). Texto claro sobre argila daria só 3,8. */
+.selo-ok {
+  background: var(--argila-sobre-tinta);
+  border-color: var(--argila-sobre-tinta);
+  color: var(--tinta);
 }
 
-/* Etiquetas de gênero: texto sobre o cartão (muted 8,0), borda de controle 4,5. */
+.meta .selo {
+  margin: 0;
+}
+
 .etiquetas {
   display: flex;
   flex-wrap: wrap;
@@ -237,64 +405,52 @@ h3 {
 }
 
 .etiquetas li {
-  padding: 0.15rem 0.6rem;
-  border: 1px solid var(--linha-forte);
+  padding: 0.1rem 0.65rem;
+  border: 1px solid var(--borda);
   border-radius: 999px;
-  color: var(--muted);
+  color: var(--apagado);
   font-size: 0.8125rem;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .acoes {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1.25rem;
-  margin: auto 0 0;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
 }
 
-.corpo .acoes {
-  margin-bottom: 0;
+.sobre .acoes {
+  margin: auto 0 0;
 }
 
 .botao {
   display: inline-block;
   padding: 0.65rem 1.25rem;
-  background: var(--verde);
-  color: var(--sobre-verde);
+  border: 2px solid var(--creme);
   font-weight: 700;
   text-decoration: none;
-  border: 2px solid var(--verde);
 }
 
-.botao:hover {
-  background: var(--ink);
-  border-color: var(--ink);
+.botao-claro {
+  background: var(--creme);
+  color: var(--tinta);
 }
 
-.link {
-  text-underline-offset: 4px;
+.botao-claro:hover {
+  background: var(--argila-sobre-tinta);
+  border-color: var(--argila-sobre-tinta);
 }
 
-/* ---------- títulos trancados ---------- */
-
-.capa-trancada {
-  display: grid;
-  place-items: center;
-  background-color: var(--fundo);
-  background-image:
-    linear-gradient(var(--linha) 1px, transparent 1px),
-    linear-gradient(90deg, var(--linha) 1px, transparent 1px);
-  background-size: 16px 16px;
-  color: var(--linha-forte);
+.botao-vazio {
+  background: transparent;
+  color: var(--creme);
 }
 
-.cadeado {
-  image-rendering: pixelated;
-}
-
-.trancado h3 {
-  color: var(--ink);
+.botao-vazio:hover {
+  background: var(--creme);
+  color: var(--tinta);
 }
 
 /* ---------- rodapé ---------- */
@@ -306,10 +462,31 @@ h3 {
   gap: 0.5rem 1.5rem;
   padding: 1.5rem var(--gutter);
   border-top: 2px solid var(--linha);
-  color: var(--muted);
+  color: var(--apagado);
   font-size: 0.9375rem;
 }
 
 .rodape p {
   margin: 0;
+}
+
+/* ---------- telas estreitas ---------- */
+
+@media (max-width: 760px) {
+  .destaque {
+    grid-template-columns: minmax(0, 1fr);
+    box-shadow: 4px 4px 0 var(--argila);
+  }
+
+  .voltar {
+    margin-left: 0;
+  }
+
+  .rank {
+    font-size: 4rem;
+  }
+
+  .com-rank {
+    padding-left: 3.5rem;
+  }
 }

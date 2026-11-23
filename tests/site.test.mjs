@@ -105,7 +105,12 @@ for (const [nome, width, height] of [
       const quebradas = await page.$$eval("img", (imgs) => imgs.filter((i) => i.naturalWidth === 0).map((i) => i.src));
       assert.deepEqual(quebradas, [], "imagens que não carregaram");
 
-      assert.ok(await page.evaluate(() => document.fonts.check('16px "Press Start 2P"')), "a fonte de pixel não carregou");
+      const fontes = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replaceAll('"', ""));
+      });
+      assert.ok(fontes.includes("Press Start 2P"), `a fonte de pixel não carregou (carregadas: ${fontes.join(", ")})`);
+      assert.ok(fontes.includes("Inter Variable"), `a fonte do texto não carregou (carregadas: ${fontes.join(", ")})`);
 
       await page.evaluate(AXE);
       const violacoes = await page.evaluate(async () => {
@@ -123,25 +128,27 @@ for (const [nome, width, height] of [
 test("os jogos no ar apontam para os endereços certos e os títulos trancados não têm link nem botão", async () => {
   const { page, context } = await abrir({ width: 1440, height: 900 });
   try {
-    /* Com mais de um "Jogar" na página, cada link diz de qual jogo é (o nome acessível contém o texto visível). */
-    const jogos = [
-      ["Arriba Jump", "https://arriba-jump.jm.dev.br"],
-      ["JJ — CONTINUE COMIGO", "https://jj-continue-comigo.jm.dev.br"]
-    ];
-    for (const [titulo, destino] of jogos) {
-      const link = page.getByRole("link", { name: `Jogar ${titulo}` });
-      assert.equal(await link.count(), 1, `deve haver um link "Jogar ${titulo}"`);
-      assert.equal(await link.getAttribute("href"), destino);
-      assert.equal((await link.textContent()).trim(), "Jogar", "o texto visível do botão é só Jogar");
+    /* Cada "Jogar" diz de qual jogo é (o nome acessível contém o texto visível "Jogar"). */
+    const destinos = {
+      "Arriba Jump": "https://arriba-jump.jm.dev.br",
+      "JJ — CONTINUE COMIGO": "https://jj-continue-comigo.jm.dev.br"
+    };
+    for (const [titulo, destino] of Object.entries(destinos)) {
+      const links = page.getByRole("link", { name: `Jogar ${titulo}` });
+      const hrefs = await links.evaluateAll((els) => els.map((e) => e.href.replace(/\/$/, "")));
+      assert.ok(hrefs.length >= 1, `falta o link "Jogar ${titulo}"`);
+      assert.ok(hrefs.every((h) => h === destino), `"Jogar ${titulo}" deve apontar para ${destino}, mas aponta para ${hrefs}`);
+      for (const texto of await links.allTextContents()) assert.match(texto, /Jogar/, "o texto visível do botão contém Jogar");
     }
-    assert.equal(await page.getByRole("link", { name: "Jogar", exact: false }).count(), 2, "só os dois jogos no ar têm botão Jogar");
+    /* O destaque e o cartão do Arriba Jump + o cartão do JJ: três botões, e nenhum outro título tem. */
+    assert.equal(await page.getByRole("link", { name: /^Jogar / }).count(), 3);
     assert.equal(
       await page.getByRole("link", { name: "Código" }).getAttribute("href"),
       "https://github.com/jonathanmesquita/arriba-jump"
     );
 
     const trancados = page.locator("article.trancado");
-    assert.equal(await trancados.count(), 3, "Dossiê 92, Caetano e um jogo ainda sem nome");
+    assert.equal(await trancados.count(), 3, "Caetano, Dossiê 92 e um jogo ainda sem nome");
     assert.equal(await trancados.locator("a, button").count(), 0, "título trancado não pode ter link nem botão");
 
     /* Cada cartão: título, situação e etiquetas exatas. Gênero só onde o jogo tem ficha; o resto fica sem. */
@@ -156,14 +163,51 @@ test("os jogos no ar apontam para os endereços certos e os títulos trancados n
       { titulo: "JJ — CONTINUE COMIGO", situacao: "No ar", etiquetas: ["Visual novel", "Pixel art", "Godot 4"] }
     ]);
     assert.deepEqual(await Promise.all((await trancados.all()).map(lido)), [
-      { titulo: "Dossiê 92", situacao: "Em breve", etiquetas: [] },
       { titulo: "Caetano: Entre Mundos", situacao: "Em desenvolvimento", etiquetas: ["Plataforma 2D", "Pixel art", "Godot 4"] },
+      { titulo: "Dossiê 92", situacao: "Em breve", etiquetas: [] },
       { titulo: "Jogo 3", situacao: "Em breve", etiquetas: [] }
     ]);
 
     /* O site público não carrega a senha do JJ: só avisa que o acesso é com senha. */
-    const html = await page.content();
-    assert.match(html, /O acesso é com senha\./);
+    assert.match(await page.content(), /Acesso com senha\./);
+  } finally {
+    await context.close();
+  }
+});
+
+test("os filtros mostram só o que casa, escondem a fileira vazia e funcionam por teclado", async () => {
+  const { page, context } = await abrir({ width: 1440, height: 900 });
+  try {
+    const visiveis = async () =>
+      page.locator("article.cartao h3").evaluateAll((hs) =>
+        hs.filter((h) => h.getClientRects().length > 0).map((h) => h.textContent.trim())
+      );
+    const fileiras = async () =>
+      page.locator(".fileira > h2").evaluateAll((hs) => hs.filter((h) => h.getClientRects().length > 0).map((h) => h.textContent.trim()));
+
+    assert.deepEqual(await visiveis(), ["Arriba Jump", "JJ — CONTINUE COMIGO", "Caetano: Entre Mundos", "Dossiê 92", "Jogo 3"]);
+    assert.deepEqual(await fileiras(), ["Em destaque", "Em breve"]);
+    assert.equal(await page.locator(".rank:visible").count(), 2, "os numerais aparecem no filtro Todos");
+
+    const casos = [
+      ["No ar", ["Arriba Jump", "JJ — CONTINUE COMIGO"], ["Em destaque"]],
+      ["Plataforma", ["Arriba Jump", "Caetano: Entre Mundos"], ["Em destaque", "Em breve"]],
+      ["Visual novel", ["JJ — CONTINUE COMIGO"], ["Em destaque"]],
+      ["Em breve", ["Caetano: Entre Mundos", "Dossiê 92", "Jogo 3"], ["Em breve"]]
+    ];
+    for (const [rotulo, titulos, secoes] of casos) {
+      await page.locator(".filtros label", { hasText: new RegExp(`^${rotulo}$`) }).click();
+      assert.deepEqual(await visiveis(), titulos, `filtro "${rotulo}"`);
+      assert.deepEqual(await fileiras(), secoes, `fileiras no filtro "${rotulo}"`);
+      assert.equal(await page.locator(".rank:visible").count(), 0, "filtrado, o numeral não faz sentido e some");
+    }
+
+    /* Teclado: foco no rádio "Todos" e seta para a direita seleciona "No ar". */
+    await page.locator(".filtros label", { hasText: /^Todos$/ }).click();
+    await page.locator("#f-todos").focus();
+    await page.keyboard.press("ArrowRight");
+    assert.ok(await page.locator("#f-live").isChecked(), "a seta para a direita deve selecionar o próximo filtro");
+    assert.deepEqual(await visiveis(), ["Arriba Jump", "JJ — CONTINUE COMIGO"]);
   } finally {
     await context.close();
   }

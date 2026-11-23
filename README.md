@@ -25,14 +25,19 @@ chegando, **trancados** até haver algo para mostrar. Um título trancado não t
 - **Etiquetas** de gênero, estilo e motor, só onde o jogo tem ficha: Arriba Jump (Plataforma,
   Runner, Pixel art), JJ (Visual novel, Pixel art, Godot 4) e Caetano (Plataforma 2D, Pixel art,
   Godot 4). Dossiê 92 e Jogo 3 não têm etiqueta: o gênero só entra quando o dono o declara.
-- Sem JavaScript. A CSP bloqueia qualquer script (`script-src 'none'`).
+- **Estrutura do catálogo do portfólio, em pixel art:** jogo em destaque, filtros em pílula
+  (Todos, No ar, Plataforma, Visual novel, Em breve), a fileira "Em destaque" com numerais
+  grandes só de contorno, a fileira "Em breve" e os títulos trancados com cadeado.
+- **Filtros sem JavaScript:** são rádios nativos + `:has()`, então funcionam por teclado (setas)
+  e a CSP continua bloqueando qualquer script (`script-src 'none'`).
 - Acessível: um `<h1>`, `alt` nas imagens, foco visível e link para pular ao conteúdo.
 - Responsivo, de 320 a 1440 px, sem rolagem lateral.
 
 ## Stack
 
-HTML e CSS puros. A fonte de pixel (Press Start 2P, licença OFL em `assets/fonts/`) é hospedada
-no próprio site. Playwright e axe-core existem só para os testes. Hospedagem na Vercel,
+HTML e CSS puros. As fontes (Press Start 2P nos títulos e Inter, a do portfólio, no texto; as
+licenças OFL estão em `assets/fonts/`) são hospedadas no próprio site. As cores são os tokens do
+portfólio (tinta, argila, creme). Playwright e axe-core existem só para os testes. Hospedagem na Vercel,
 com os cabeçalhos em `vercel.json` e o DNS no Cloudflare.
 
 ## Arquitetura
@@ -42,7 +47,7 @@ index.html                       a página
 vercel.json                      CSP e demais cabeçalhos de segurança
 assets/
 ├── css/style.css                estilo único; cores só por token, cada par medido em contraste
-├── fonts/                       Press Start 2P + licença OFL
+├── fonts/                       Press Start 2P e Inter + licenças OFL
 ├── icons/
 │   ├── favicon.ico              16, 32, 48 e 64 px (o teste confere)
 │   ├── apple-touch-icon.png     180 px, fundo opaco (o iOS ignora transparência)
@@ -70,9 +75,10 @@ npm test
 
 Abre o site no Chromium com os cabeçalhos do `vercel.json` e confere, em 320, 390 e 1440 px:
 nenhum erro de console, de CSP ou de rede; sem rolagem lateral; um `<h1>`; imagens e fonte
-carregadas; zero violações WCAG A/AA no axe. Confere também que o Arriba Jump aponta para os
-endereços certos, que os títulos trancados não têm link nem botão e que o HTML não tem script
-nem estilo inline.
+carregadas (as duas fontes); zero violações WCAG A/AA no axe. Confere também que os dois jogos no
+ar apontam para os endereços certos, que cada cartão tem título, situação e etiquetas exatas, que
+os títulos trancados não têm link nem botão, que **cada filtro mostra só o que casa** (e esconde a
+fileira que ficou vazia, e funciona por teclado) e que o HTML não tem script nem estilo inline.
 
 ## Variáveis de ambiente
 
@@ -89,8 +95,10 @@ deste repositório.
 
 ## Decisões
 
-- **Separado do portfólio.** Game dev é hobby; ele tem o próprio endereço e o próprio visual
-  (escuro, com fonte de pixel), diferente do `jm.dev.br`.
+- **Mesma estrutura do portfólio, visual de pixel.** O dono pediu que o Play se parecesse com o
+  catálogo do `jm.dev.br`, mas em pixel art. Game dev continua separado (endereço próprio), só
+  que com a mesma linguagem: tokens de cor, destaque, filtros, fileiras e cartões. O que é do
+  Play é o pixel: Press Start 2P, bordas retas e sombra dura, sem canto arredondado.
 - **Título trancado sem descrição.** Nenhum trancado tem texto além do nome, da situação e da
   ficha (gênero, estilo, motor) que o dono forneceu: o jogo ainda não existe, e nada é inventado.
   Para destrancar, troque o cartão por um completo em `index.html`, com o botão "Jogar" e o
@@ -110,6 +118,5 @@ deste repositório.
 
 - [ ] Destrancar cada título quando houver o que mostrar (um por vez), com o gênero dele.
 - [ ] Versão de 16 px do ícone desenhada à mão (hoje ela vira uma mancha laranja com um ponto verde).
-- [ ] Filtro por gênero (como no portfólio). Exige JavaScript e afrouxar a CSP; só vale com mais títulos.
 - [ ] Imagem social (`og:image`) da página.
 - [ ] Inglês, se a página ganhar público fora do Brasil.
