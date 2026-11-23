@@ -19,8 +19,9 @@ chegando, **trancados** até haver algo para mostrar. Um título trancado não t
 
 ## Funcionalidades
 
-- Uma página, em português, com o Arriba Jump no ar e quatro títulos trancados: **JJ — CONTINUE
-  COMIGO** e **Caetano: Entre Mundos** ("Em desenvolvimento") e Dossiê 92 e Jogo 3 ("Em breve").
+- Uma página, em português, com **dois jogos no ar**, o Arriba Jump e **JJ — CONTINUE COMIGO**
+  (este com acesso por senha), e três títulos trancados: **Caetano: Entre Mundos** ("Em
+  desenvolvimento") e Dossiê 92 e Jogo 3 ("Em breve").
 - **Etiquetas** de gênero, estilo e motor, só onde o jogo tem ficha: Arriba Jump (Plataforma,
   Runner, Pixel art), JJ (Visual novel, Pixel art, Godot 4) e Caetano (Plataforma 2D, Pixel art,
   Godot 4). Dossiê 92 e Jogo 3 não têm etiqueta: o gênero só entra quando o dono o declara.
@@ -91,7 +92,13 @@ deste repositório.
 - **Separado do portfólio.** Game dev é hobby; ele tem o próprio endereço e o próprio visual
   (escuro, com fonte de pixel), diferente do `jm.dev.br`.
 - **Título trancado sem descrição.** Nenhum trancado tem texto além do nome, da situação e da
-  ficha (gênero, estilo, motor) que o dono forneceu: o jogo ainda não existe, e nada é inventado. Para destrancar, troque o cartão trancado por um completo em `index.html`.
+  ficha (gênero, estilo, motor) que o dono forneceu: o jogo ainda não existe, e nada é inventado.
+  Para destrancar, troque o cartão por um completo em `index.html`, com o botão "Jogar" e o
+  `aria-label` "Jogar <título>" (há mais de um botão Jogar na página).
+- **Jogo com senha.** O JJ está no ar em `jj-continue-comigo.jm.dev.br`, com a senha configurada
+  na Vercel (*Deployment Protection*) por quem o publica. **A senha não fica neste repositório
+  nem na página**: o cartão só avisa que o acesso é com senha, e um teste confere que a página
+  não a carrega.
 - **Sem JavaScript.** Uma vitrine não precisa dele, e a CSP fica mais fechada por isso.
 - **Imagem só do que é do projeto.** O pôster é do Arriba Jump (do dono). O ícone, um controle
   de jogo em pixel art, foi importado pelo dono em 256 px; a ferramenta que o gerou **ainda não

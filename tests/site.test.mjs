@@ -120,16 +120,28 @@ for (const [nome, width, height] of [
   });
 }
 
-test("Arriba Jump aponta para os endereços certos e os títulos trancados não têm link nem botão", async () => {
+test("os jogos no ar apontam para os endereços certos e os títulos trancados não têm link nem botão", async () => {
   const { page, context } = await abrir({ width: 1440, height: 900 });
   try {
-    const jogar = page.getByRole("link", { name: "Jogar" });
-    assert.equal(await jogar.getAttribute("href"), "https://arriba-jump.jm.dev.br");
-    const codigo = page.getByRole("link", { name: "Código" });
-    assert.equal(await codigo.getAttribute("href"), "https://github.com/jonathanmesquita/arriba-jump");
+    /* Com mais de um "Jogar" na página, cada link diz de qual jogo é (o nome acessível contém o texto visível). */
+    const jogos = [
+      ["Arriba Jump", "https://arriba-jump.jm.dev.br"],
+      ["JJ — CONTINUE COMIGO", "https://jj-continue-comigo.jm.dev.br"]
+    ];
+    for (const [titulo, destino] of jogos) {
+      const link = page.getByRole("link", { name: `Jogar ${titulo}` });
+      assert.equal(await link.count(), 1, `deve haver um link "Jogar ${titulo}"`);
+      assert.equal(await link.getAttribute("href"), destino);
+      assert.equal((await link.textContent()).trim(), "Jogar", "o texto visível do botão é só Jogar");
+    }
+    assert.equal(await page.getByRole("link", { name: "Jogar", exact: false }).count(), 2, "só os dois jogos no ar têm botão Jogar");
+    assert.equal(
+      await page.getByRole("link", { name: "Código" }).getAttribute("href"),
+      "https://github.com/jonathanmesquita/arriba-jump"
+    );
 
     const trancados = page.locator("article.trancado");
-    assert.equal(await trancados.count(), 4, "Dossiê 92, JJ, Caetano e um jogo ainda sem nome");
+    assert.equal(await trancados.count(), 3, "Dossiê 92, Caetano e um jogo ainda sem nome");
     assert.equal(await trancados.locator("a, button").count(), 0, "título trancado não pode ter link nem botão");
 
     /* Cada cartão: título, situação e etiquetas exatas. Gênero só onde o jogo tem ficha; o resto fica sem. */
@@ -138,20 +150,20 @@ test("Arriba Jump aponta para os endereços certos e os títulos trancados não 
       situacao: (await cartao.locator(".selo").textContent()).trim(),
       etiquetas: await cartao.locator(".etiquetas li").allTextContents()
     });
-    assert.deepEqual(await lido(page.locator("article.cartao").first()), {
-      titulo: "Arriba Jump",
-      situacao: "No ar",
-      etiquetas: ["Plataforma", "Runner", "Pixel art"]
-    });
-    assert.deepEqual(
-      await Promise.all((await trancados.all()).map(lido)),
-      [
-        { titulo: "Dossiê 92", situacao: "Em breve", etiquetas: [] },
-        { titulo: "JJ — CONTINUE COMIGO", situacao: "Em desenvolvimento", etiquetas: ["Visual novel", "Pixel art", "Godot 4"] },
-        { titulo: "Caetano: Entre Mundos", situacao: "Em desenvolvimento", etiquetas: ["Plataforma 2D", "Pixel art", "Godot 4"] },
-        { titulo: "Jogo 3", situacao: "Em breve", etiquetas: [] }
-      ]
-    );
+    const noAr = page.locator("article.cartao:not(.trancado)");
+    assert.deepEqual(await Promise.all((await noAr.all()).map(lido)), [
+      { titulo: "Arriba Jump", situacao: "No ar", etiquetas: ["Plataforma", "Runner", "Pixel art"] },
+      { titulo: "JJ — CONTINUE COMIGO", situacao: "No ar", etiquetas: ["Visual novel", "Pixel art", "Godot 4"] }
+    ]);
+    assert.deepEqual(await Promise.all((await trancados.all()).map(lido)), [
+      { titulo: "Dossiê 92", situacao: "Em breve", etiquetas: [] },
+      { titulo: "Caetano: Entre Mundos", situacao: "Em desenvolvimento", etiquetas: ["Plataforma 2D", "Pixel art", "Godot 4"] },
+      { titulo: "Jogo 3", situacao: "Em breve", etiquetas: [] }
+    ]);
+
+    /* O site público não carrega a senha do JJ: só avisa que o acesso é com senha. */
+    const html = await page.content();
+    assert.match(html, /O acesso é com senha\./);
   } finally {
     await context.close();
   }
