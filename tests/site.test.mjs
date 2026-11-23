@@ -93,6 +93,16 @@ for (const [nome, width, height] of [
     try {
       assert.equal(await page.locator("h1").count(), 1, "deve haver um único <h1>");
 
+      /* Sentinela de "o CSS foi aplicado": com HTML novo e CSS velho, os rádios dos filtros aparecem e o cartão perde a borda. */
+      const estilo = await page.evaluate(() => ({
+        radios: [...document.querySelectorAll(".filtros input")].map((i) => getComputedStyle(i).opacity),
+        borda: getComputedStyle(document.querySelector("article.cartao")).borderTopWidth,
+        marcadores: getComputedStyle(document.querySelector(".trilho")).listStyleType
+      }));
+      assert.deepEqual([...new Set(estilo.radios)], ["0"], "os rádios dos filtros devem estar escondidos (CSS não aplicado?)");
+      assert.equal(estilo.borda, "2px", "o cartão deve ter borda de 2px (CSS não aplicado?)");
+      assert.equal(estilo.marcadores, "none", "a lista de cartões não pode ter marcadores (CSS não aplicado?)");
+
       const largura = await page.evaluate(() => ({
         pagina: document.documentElement.scrollWidth,
         janela: document.documentElement.clientWidth
@@ -227,6 +237,16 @@ test("a CSP é fechada e o HTML não tem script nem estilo inline", async () => 
   const html = await resposta.text();
   assert.ok(!/<script/i.test(html), "o site não usa JavaScript");
   assert.ok(!/<style/i.test(html) && !/\sstyle=/i.test(html), "nada de estilo inline");
+});
+
+test("os arquivos de /assets revalidam: sem cache longo, porque o nome não tem versão", async () => {
+  /* Já deu errado: com max-age=86400, quem visitou no mesmo dia ficou com o CSS velho e o HTML novo (página sem estilo). */
+  for (const caminho of ["/assets/css/style.css", "/assets/img/games/arriba-jump.webp", "/assets/icons/favicon.ico"]) {
+    const cache = (await fetch(`${base}${caminho}`)).headers.get("cache-control") ?? "";
+    assert.match(cache, /max-age=0/, `${caminho}: deve revalidar (max-age=0), mas veio "${cache}"`);
+    assert.match(cache, /must-revalidate/, `${caminho}: deve ter must-revalidate`);
+  }
+  assert.match(await (await fetch(`${base}/`)).text(), /href="\/assets\/css\/style\.css\?v=\d+"/, "o link do CSS carrega ?v=, para tirar a cópia velha do cache");
 });
 
 test("o favicon declarado existe, tem os tamanhos certos e os ícones e robots.txt são servidos", async () => {
