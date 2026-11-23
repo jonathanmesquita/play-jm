@@ -129,14 +129,29 @@ test("Arriba Jump aponta para os endereços certos e os títulos trancados não 
     assert.equal(await codigo.getAttribute("href"), "https://github.com/jonathanmesquita/arriba-jump");
 
     const trancados = page.locator("article.trancado");
-    assert.equal(await trancados.count(), 4, "Dossiê 92 e três jogos ainda sem nome");
+    assert.equal(await trancados.count(), 4, "Dossiê 92, JJ, Caetano e um jogo ainda sem nome");
     assert.equal(await trancados.locator("a, button").count(), 0, "título trancado não pode ter link nem botão");
-    assert.equal(await trancados.getByText("Em breve").count(), 4);
 
-    /* Etiquetas de gênero só onde o gênero é conhecido: o Arriba Jump. Título trancado não inventa gênero. */
-    const generos = await page.getByRole("list", { name: "Gêneros" }).locator("li").allTextContents();
-    assert.deepEqual(generos, ["Plataforma", "Runner", "Pixel art"]);
-    assert.equal(await trancados.getByRole("list", { name: "Gêneros" }).count(), 0, "título trancado não tem gênero declarado");
+    /* Cada cartão: título, situação e etiquetas exatas. Gênero só onde o jogo tem ficha; o resto fica sem. */
+    const lido = async (cartao) => ({
+      titulo: (await cartao.locator("h3").textContent()).trim(),
+      situacao: (await cartao.locator(".selo").textContent()).trim(),
+      etiquetas: await cartao.locator(".etiquetas li").allTextContents()
+    });
+    assert.deepEqual(await lido(page.locator("article.cartao").first()), {
+      titulo: "Arriba Jump",
+      situacao: "No ar",
+      etiquetas: ["Plataforma", "Runner", "Pixel art"]
+    });
+    assert.deepEqual(
+      await Promise.all((await trancados.all()).map(lido)),
+      [
+        { titulo: "Dossiê 92", situacao: "Em breve", etiquetas: [] },
+        { titulo: "JJ — CONTINUE COMIGO", situacao: "Em desenvolvimento", etiquetas: ["Visual novel", "Pixel art", "Godot 4"] },
+        { titulo: "Caetano: Entre Mundos", situacao: "Em desenvolvimento", etiquetas: ["Plataforma 2D", "Pixel art", "Godot 4"] },
+        { titulo: "Jogo 3", situacao: "Em breve", etiquetas: [] }
+      ]
+    );
   } finally {
     await context.close();
   }
