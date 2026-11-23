@@ -1,5 +1,5 @@
 /*
- * Conferência do site no Chromium, com os cabeçalhos de produção do arquivo `_headers`
+ * Conferência do site no Chromium, com os cabeçalhos de produção do `vercel.json`
  * (CSP incluída). Roda com `npm test` e em todo pull request (.github/workflows/ci.yml).
  *
  * O que guarda: a página abre sem erro de console, de CSP ou de rede, de 320 a 1440 px,
@@ -28,25 +28,9 @@ const TIPOS = {
   ".txt": "text/plain; charset=utf-8"
 };
 
-/* Lê o `_headers` do Cloudflare Pages: um padrão por bloco (com `*` no fim) e os cabeçalhos indentados. */
-function lerCabecalhos() {
-  const blocos = [];
-  let atual = null;
-  for (const linha of fs.readFileSync(path.join(RAIZ, "_headers"), "utf8").split("\n")) {
-    if (!linha.trim()) continue;
-    if (!linha.startsWith(" ")) {
-      atual = { padrao: linha.trim(), cabecalhos: {} };
-      blocos.push(atual);
-    } else {
-      const i = linha.indexOf(":");
-      atual.cabecalhos[linha.slice(0, i).trim()] = linha.slice(i + 1).trim();
-    }
-  }
-  return blocos;
-}
-
-const BLOCOS = lerCabecalhos();
-const casa = (padrao, caminho) => new RegExp(`^${padrao.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*")}$`).test(caminho);
+/* Lê o `vercel.json`: cada regra tem um `source` (com `(.*)` para "qualquer coisa") e os cabeçalhos. */
+const REGRAS = JSON.parse(fs.readFileSync(path.join(RAIZ, "vercel.json"), "utf8")).headers;
+const casa = (source, caminho) => new RegExp(`^${source.replace(/\(\.\*\)/g, ".*")}$`).test(caminho);
 
 function servir() {
   return http.createServer((req, res) => {
@@ -58,7 +42,9 @@ function servir() {
       return res.end("não encontrado");
     }
     const cabecalhos = { "Content-Type": TIPOS[path.extname(arquivo)] ?? "application/octet-stream" };
-    for (const bloco of BLOCOS) if (casa(bloco.padrao, caminho)) Object.assign(cabecalhos, bloco.cabecalhos);
+    for (const regra of REGRAS) {
+      if (casa(regra.source, caminho)) for (const h of regra.headers) cabecalhos[h.key] = h.value;
+    }
     res.writeHead(200, cabecalhos);
     fs.createReadStream(arquivo).pipe(res);
   });
@@ -146,6 +132,11 @@ test("Arriba Jump aponta para os endereços certos e os títulos trancados não 
     assert.equal(await trancados.count(), 4, "Dossiê 92 e três jogos ainda sem nome");
     assert.equal(await trancados.locator("a, button").count(), 0, "título trancado não pode ter link nem botão");
     assert.equal(await trancados.getByText("Em breve").count(), 4);
+
+    /* Etiquetas de gênero só onde o gênero é conhecido: o Arriba Jump. Título trancado não inventa gênero. */
+    const generos = await page.getByRole("list", { name: "Gêneros" }).locator("li").allTextContents();
+    assert.deepEqual(generos, ["Plataforma", "Runner", "Pixel art"]);
+    assert.equal(await trancados.getByRole("list", { name: "Gêneros" }).count(), 0, "título trancado não tem gênero declarado");
   } finally {
     await context.close();
   }
@@ -167,8 +158,20 @@ test("a CSP é fechada e o HTML não tem script nem estilo inline", async () => 
   assert.ok(!/<style/i.test(html) && !/\sstyle=/i.test(html), "nada de estilo inline");
 });
 
-test("favicon, ícone do iOS e robots.txt são servidos", async () => {
-  for (const caminho of ["/favicon.ico", "/assets/img/apple-touch-icon.png", "/robots.txt"]) {
+test("o favicon declarado existe, tem os tamanhos certos e os ícones e robots.txt são servidos", async () => {
+  for (const caminho of ["/assets/icons/favicon.ico", "/assets/icons/apple-touch-icon.png", "/robots.txt"]) {
     assert.equal((await fetch(`${base}${caminho}`)).status, 200, caminho);
   }
+
+  /* O .ico precisa ter os tamanhos que o HTML declara; com uma imagem só, o navegador reduz sozinho e borra. */
+  const ico = Buffer.from(await (await fetch(`${base}/assets/icons/favicon.ico`)).arrayBuffer());
+  assert.equal(ico.readUInt16LE(2), 1, "o arquivo não é um .ico");
+  const tamanhos = Array.from({ length: ico.readUInt16LE(4) }, (_, i) => ico[6 + 16 * i] || 256).sort((x, y) => x - y);
+  assert.deepEqual(tamanhos, [16, 32, 48, 64], "o favicon.ico deve ter 16, 32, 48 e 64 px");
+
+  /* O ícone do iPhone ignora transparência e tem 180 px: PNG sem canal alfa. */
+  const apple = Buffer.from(await (await fetch(`${base}/assets/icons/apple-touch-icon.png`)).arrayBuffer());
+  assert.equal(apple.readUInt32BE(16), 180);
+  assert.equal(apple.readUInt32BE(20), 180);
+  assert.equal(apple[25], 2, "o apple-touch-icon deve ser RGB, sem transparência");
 });
