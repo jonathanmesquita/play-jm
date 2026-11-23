@@ -103,6 +103,12 @@ deste repositório.
   ficha (gênero, estilo, motor) que o dono forneceu: o jogo ainda não existe, e nada é inventado.
   Para destrancar, troque o cartão por um completo em `index.html`, com o botão "Jogar" e o
   `aria-label` "Jogar <título>" (há mais de um botão Jogar na página).
+- **Os arquivos de `assets/` revalidam a cada visita** (`Cache-Control: max-age=0, must-revalidate`
+  no `vercel.json`), porque o nome deles não tem versão. Já deu errado: com `max-age=86400`, quem
+  visitou no mesmo dia ficou com o **CSS velho e o HTML novo**, e a página saiu sem estilo (rádios
+  dos filtros à mostra, lista com marcador). Dois testes guardam isso: um confere o cabeçalho e
+  o outro confere que o CSS foi aplicado. Se um dia for preciso tirar um arquivo do cache de quem
+  já o guardou, mude o `?v=` no link (hoje `style.css?v=2`).
 - **Jogo com senha.** O JJ está no ar em `jj-continue-comigo.jm.dev.br`, com a senha configurada
   na Vercel (*Deployment Protection*) por quem o publica. **A senha não fica neste repositório
   nem na página**: o cartão só avisa que o acesso é com senha, e um teste confere que a página
