@@ -19,10 +19,11 @@ chegando, **trancados** até haver algo para mostrar. Um título trancado não t
 
 ## Funcionalidades
 
-- Uma página, em português, com o Arriba Jump no ar e quatro títulos "Em breve" (Dossiê 92 e
-  três jogos que ainda não têm nome).
-- **Etiquetas de gênero** (Plataforma, Runner, Pixel art) nos jogos no ar. Título trancado não
-  tem etiqueta: o gênero só entra quando o jogo existir de fato.
+- Uma página, em português, com o Arriba Jump no ar e quatro títulos trancados: **JJ — CONTINUE
+  COMIGO** e **Caetano: Entre Mundos** ("Em desenvolvimento") e Dossiê 92 e Jogo 3 ("Em breve").
+- **Etiquetas** de gênero, estilo e motor, só onde o jogo tem ficha: Arriba Jump (Plataforma,
+  Runner, Pixel art), JJ (Visual novel, Pixel art, Godot 4) e Caetano (Plataforma 2D, Pixel art,
+  Godot 4). Dossiê 92 e Jogo 3 não têm etiqueta: o gênero só entra quando o dono o declara.
 - Sem JavaScript. A CSP bloqueia qualquer script (`script-src 'none'`).
 - Acessível: um `<h1>`, `alt` nas imagens, foco visível e link para pular ao conteúdo.
 - Responsivo, de 320 a 1440 px, sem rolagem lateral.
@@ -89,8 +90,8 @@ deste repositório.
 
 - **Separado do portfólio.** Game dev é hobby; ele tem o próprio endereço e o próprio visual
   (escuro, com fonte de pixel), diferente do `jm.dev.br`.
-- **Título trancado sem descrição.** Dossiê 92 e "Jogo 1 a 3" não têm texto, porque o projeto
-  ainda não existe. Para destrancar, troque o cartão trancado por um completo em `index.html`.
+- **Título trancado sem descrição.** Nenhum trancado tem texto além do nome, da situação e da
+  ficha (gênero, estilo, motor) que o dono forneceu: o jogo ainda não existe, e nada é inventado. Para destrancar, troque o cartão trancado por um completo em `index.html`.
 - **Sem JavaScript.** Uma vitrine não precisa dele, e a CSP fica mais fechada por isso.
 - **Imagem só do que é do projeto.** O pôster é do Arriba Jump (do dono). O ícone, um controle
   de jogo em pixel art, foi importado pelo dono em 256 px; a ferramenta que o gerou **ainda não
