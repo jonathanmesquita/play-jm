@@ -3,9 +3,9 @@
 > **EN:** The creative side of Jonathan Mesquita: games and pixel art under the name
 > **Sapo Pixelado**, kept apart from the software portfolio at
 > [jm.dev.br](https://jm.dev.br). A static site — plain HTML and CSS, no JavaScript, no build.
-> Planned address: **https://play.jm.dev.br**.
+> Address: **https://play.jm.dev.br**.
 
-**Versão:** 0.1.0 · **Estado:** protótipo, ainda não publicado
+**Versão:** 0.1.0 · **Estado:** protótipo
 
 ## Problema
 
@@ -28,8 +28,8 @@ chegando, **trancados** até haver algo para mostrar. Um título trancado não t
 ## Stack
 
 HTML e CSS puros. A fonte de pixel (Press Start 2P, licença OFL em `assets/fonts/`) é hospedada
-no próprio site. Playwright e axe-core existem só para os testes. Hospedagem prevista:
-Cloudflare Pages, com os cabeçalhos em `_headers`.
+no próprio site. Playwright e axe-core existem só para os testes. Hospedagem na Vercel,
+com os cabeçalhos em `vercel.json` e o DNS no Cloudflare.
 
 ## Arquitetura
 
@@ -39,7 +39,7 @@ assets/css/style.css     estilo único; cores só por token, cada par medido em 
 assets/img/              pôster do Arriba Jump (cortado do jogo) e ícone do iOS
 assets/fonts/            Press Start 2P + licença
 favicon.ico              ícone do sapo (arte do dono)
-_headers                 CSP e demais cabeçalhos de segurança (formato do Cloudflare Pages)
+vercel.json              CSP e demais cabeçalhos de segurança
 tests/site.test.mjs      Chromium + axe + CSP
 ```
 
@@ -58,7 +58,7 @@ npm ci && npx playwright install chromium   # uma vez
 npm test
 ```
 
-Abre o site no Chromium com os cabeçalhos do `_headers` e confere, em 320, 390 e 1440 px:
+Abre o site no Chromium com os cabeçalhos do `vercel.json` e confere, em 320, 390 e 1440 px:
 nenhum erro de console, de CSP ou de rede; sem rolagem lateral; um `<h1>`; imagens e fonte
 carregadas; zero violações WCAG A/AA no axe. Confere também que o Arriba Jump aponta para os
 endereços certos, que os títulos trancados não têm link nem botão e que o HTML não tem script
@@ -70,8 +70,12 @@ Nenhuma.
 
 ## Deploy
 
-Cloudflare Pages, sem comando de build e com a raiz do repositório como diretório de saída.
-Domínio previsto: `play.jm.dev.br`.
+Vercel, com o preset `Other`, sem comando de build e sem diretório de saída: a raiz do
+repositório é servida como está. O domínio `play.jm.dev.br` é um CNAME no Cloudflare apontando
+para a Vercel, com o proxy do Cloudflare **desligado** (só DNS), senão o certificado pode falhar.
+A Vercel só aplica os cabeçalhos do `vercel.json`; um arquivo `_headers` (formato do Cloudflare
+Pages) seria ignorado. Depois de cada deploy, confira que o commit de produção é da `main`
+deste repositório.
 
 ## Decisões
 

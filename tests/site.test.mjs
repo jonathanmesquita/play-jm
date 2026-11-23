@@ -1,5 +1,5 @@
 /*
- * Conferência do site no Chromium, com os cabeçalhos de produção do arquivo `_headers`
+ * Conferência do site no Chromium, com os cabeçalhos de produção do `vercel.json`
  * (CSP incluída). Roda com `npm test` e em todo pull request (.github/workflows/ci.yml).
  *
  * O que guarda: a página abre sem erro de console, de CSP ou de rede, de 320 a 1440 px,
@@ -28,25 +28,9 @@ const TIPOS = {
   ".txt": "text/plain; charset=utf-8"
 };
 
-/* Lê o `_headers` do Cloudflare Pages: um padrão por bloco (com `*` no fim) e os cabeçalhos indentados. */
-function lerCabecalhos() {
-  const blocos = [];
-  let atual = null;
-  for (const linha of fs.readFileSync(path.join(RAIZ, "_headers"), "utf8").split("\n")) {
-    if (!linha.trim()) continue;
-    if (!linha.startsWith(" ")) {
-      atual = { padrao: linha.trim(), cabecalhos: {} };
-      blocos.push(atual);
-    } else {
-      const i = linha.indexOf(":");
-      atual.cabecalhos[linha.slice(0, i).trim()] = linha.slice(i + 1).trim();
-    }
-  }
-  return blocos;
-}
-
-const BLOCOS = lerCabecalhos();
-const casa = (padrao, caminho) => new RegExp(`^${padrao.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*")}$`).test(caminho);
+/* Lê o `vercel.json`: cada regra tem um `source` (com `(.*)` para "qualquer coisa") e os cabeçalhos. */
+const REGRAS = JSON.parse(fs.readFileSync(path.join(RAIZ, "vercel.json"), "utf8")).headers;
+const casa = (source, caminho) => new RegExp(`^${source.replace(/\(\.\*\)/g, ".*")}$`).test(caminho);
 
 function servir() {
   return http.createServer((req, res) => {
@@ -58,7 +42,9 @@ function servir() {
       return res.end("não encontrado");
     }
     const cabecalhos = { "Content-Type": TIPOS[path.extname(arquivo)] ?? "application/octet-stream" };
-    for (const bloco of BLOCOS) if (casa(bloco.padrao, caminho)) Object.assign(cabecalhos, bloco.cabecalhos);
+    for (const regra of REGRAS) {
+      if (casa(regra.source, caminho)) for (const h of regra.headers) cabecalhos[h.key] = h.value;
+    }
     res.writeHead(200, cabecalhos);
     fs.createReadStream(arquivo).pipe(res);
   });
