@@ -21,6 +21,8 @@ chegando, **trancados** até haver algo para mostrar. Um título trancado não t
 
 - Uma página, em português, com o Arriba Jump no ar e quatro títulos "Em breve" (Dossiê 92 e
   três jogos que ainda não têm nome).
+- **Etiquetas de gênero** (Plataforma, Runner, Pixel art) nos jogos no ar. Título trancado não
+  tem etiqueta: o gênero só entra quando o jogo existir de fato.
 - Sem JavaScript. A CSP bloqueia qualquer script (`script-src 'none'`).
 - Acessível: um `<h1>`, `alt` nas imagens, foco visível e link para pular ao conteúdo.
 - Responsivo, de 320 a 1440 px, sem rolagem lateral.
@@ -34,14 +36,20 @@ com os cabeçalhos em `vercel.json` e o DNS no Cloudflare.
 ## Arquitetura
 
 ```text
-index.html               a página
-assets/css/style.css     estilo único; cores só por token, cada par medido em contraste
-assets/img/              pôster do Arriba Jump (cortado do jogo) e ícone do iOS
-assets/fonts/            Press Start 2P + licença
-favicon.ico              ícone do sapo (arte do dono)
-vercel.json              CSP e demais cabeçalhos de segurança
-tests/site.test.mjs      Chromium + axe + CSP
+index.html                       a página
+vercel.json                      CSP e demais cabeçalhos de segurança
+assets/
+├── css/style.css                estilo único; cores só por token, cada par medido em contraste
+├── fonts/                       Press Start 2P + licença OFL
+├── icons/
+│   ├── favicon.ico              16, 32, 48 e 64 px (o teste confere)
+│   ├── apple-touch-icon.png     180 px, fundo opaco (o iOS ignora transparência)
+│   └── controle-256.png         arte original, sem perda: de onde saem os outros tamanhos
+└── img/games/                   uma imagem por jogo (hoje: arriba-jump.webp, cortada do jogo)
+tests/site.test.mjs              Chromium + axe + CSP
 ```
+
+Imagem nova de jogo entra em `assets/img/games/<jogo>.webp`; ícone, em `assets/icons/`.
 
 ## Rodar localmente
 
@@ -84,11 +92,16 @@ deste repositório.
 - **Título trancado sem descrição.** Dossiê 92 e "Jogo 1 a 3" não têm texto, porque o projeto
   ainda não existe. Para destrancar, troque o cartão trancado por um completo em `index.html`.
 - **Sem JavaScript.** Uma vitrine não precisa dele, e a CSP fica mais fechada por isso.
-- **Imagem só do que é do projeto.** O pôster é do Arriba Jump (do dono) e o ícone é o sapo do
-  dono. Arte de terceiros só entra com licença e origem anotada.
+- **Imagem só do que é do projeto.** O pôster é do Arriba Jump (do dono). O ícone, um controle
+  de jogo em pixel art, foi importado pelo dono em 256 px; a ferramenta que o gerou **ainda não
+  está anotada aqui** (anotar). Os tamanhos de 16 a 64 px e o ícone do iOS saem dele, reduzidos
+  com LANCZOS, porque a arte tem bordas suavizadas e não é pixel exato. Arte de terceiros só
+  entra com licença e origem anotada.
 
 ## Roadmap
 
-- [ ] Destrancar cada título quando houver o que mostrar (um por vez).
+- [ ] Destrancar cada título quando houver o que mostrar (um por vez), com o gênero dele.
+- [ ] Versão de 16 px do ícone desenhada à mão (hoje ela vira uma mancha laranja com um ponto verde).
+- [ ] Filtro por gênero (como no portfólio). Exige JavaScript e afrouxar a CSP; só vale com mais títulos.
 - [ ] Imagem social (`og:image`) da página.
 - [ ] Inglês, se a página ganhar público fora do Brasil.

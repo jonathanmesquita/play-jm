@@ -132,6 +132,11 @@ test("Arriba Jump aponta para os endereços certos e os títulos trancados não 
     assert.equal(await trancados.count(), 4, "Dossiê 92 e três jogos ainda sem nome");
     assert.equal(await trancados.locator("a, button").count(), 0, "título trancado não pode ter link nem botão");
     assert.equal(await trancados.getByText("Em breve").count(), 4);
+
+    /* Etiquetas de gênero só onde o gênero é conhecido: o Arriba Jump. Título trancado não inventa gênero. */
+    const generos = await page.getByRole("list", { name: "Gêneros" }).locator("li").allTextContents();
+    assert.deepEqual(generos, ["Plataforma", "Runner", "Pixel art"]);
+    assert.equal(await trancados.getByRole("list", { name: "Gêneros" }).count(), 0, "título trancado não tem gênero declarado");
   } finally {
     await context.close();
   }
@@ -153,8 +158,20 @@ test("a CSP é fechada e o HTML não tem script nem estilo inline", async () => 
   assert.ok(!/<style/i.test(html) && !/\sstyle=/i.test(html), "nada de estilo inline");
 });
 
-test("favicon, ícone do iOS e robots.txt são servidos", async () => {
-  for (const caminho of ["/favicon.ico", "/assets/img/apple-touch-icon.png", "/robots.txt"]) {
+test("o favicon declarado existe, tem os tamanhos certos e os ícones e robots.txt são servidos", async () => {
+  for (const caminho of ["/assets/icons/favicon.ico", "/assets/icons/apple-touch-icon.png", "/robots.txt"]) {
     assert.equal((await fetch(`${base}${caminho}`)).status, 200, caminho);
   }
+
+  /* O .ico precisa ter os tamanhos que o HTML declara; com uma imagem só, o navegador reduz sozinho e borra. */
+  const ico = Buffer.from(await (await fetch(`${base}/assets/icons/favicon.ico`)).arrayBuffer());
+  assert.equal(ico.readUInt16LE(2), 1, "o arquivo não é um .ico");
+  const tamanhos = Array.from({ length: ico.readUInt16LE(4) }, (_, i) => ico[6 + 16 * i] || 256).sort((x, y) => x - y);
+  assert.deepEqual(tamanhos, [16, 32, 48, 64], "o favicon.ico deve ter 16, 32, 48 e 64 px");
+
+  /* O ícone do iPhone ignora transparência e tem 180 px: PNG sem canal alfa. */
+  const apple = Buffer.from(await (await fetch(`${base}/assets/icons/apple-touch-icon.png`)).arrayBuffer());
+  assert.equal(apple.readUInt32BE(16), 180);
+  assert.equal(apple.readUInt32BE(20), 180);
+  assert.equal(apple[25], 2, "o apple-touch-icon deve ser RGB, sem transparência");
 });

@@ -226,6 +226,25 @@ h3 {
   color: var(--sobre-verde);
 }
 
+/* Etiquetas de gênero: texto sobre o cartão (muted 8,0), borda de controle 4,5. */
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.etiquetas li {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--linha-forte);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
 .acoes {
   display: flex;
   flex-wrap: wrap;
