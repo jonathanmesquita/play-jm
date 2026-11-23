@@ -1,0 +1,296 @@
+/*
+ * Play JM — estilo único. Cores só por token; cada par texto × fundo foi medido
+ * (ink/fundo 15,7 · muted/fundo 8,9 · verde/fundo 10,5 · laranja/fundo 8,8 ·
+ * texto escuro sobre verde 9,4 · borda de controle sobre o cartão 4,5).
+ * Sem script e sem estilo dentro do HTML, para a CSP poder ficar fechada.
+ */
+
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("/assets/fonts/press-start-2p-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  --fundo: #15121a;
+  --superficie: #211c2b;
+  --ink: #f3ecdc;
+  --muted: #b9b0c8;
+  --verde: #7ed957;
+  --sobre-verde: #10230a;
+  --laranja: #ff9a3c;
+  --linha: #3a3248;
+  --linha-forte: #8a7fa3;
+
+  --pixel: "Press Start 2P", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --gutter: clamp(16px, 4vw, 40px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--fundo);
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fundo);
+  color: var(--ink);
+  font-family: var(--texto);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+a {
+  color: var(--verde);
+}
+
+a:focus-visible,
+.botao:focus-visible {
+  outline: 3px solid var(--laranja);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: var(--gutter);
+  top: -4rem;
+  padding: 0.6rem 1rem;
+  background: var(--verde);
+  color: var(--sobre-verde);
+  font-weight: 700;
+  z-index: 10;
+}
+
+.skip:focus {
+  top: 0.75rem;
+}
+
+/* ---------- topo ---------- */
+
+.topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1.25rem var(--gutter);
+  border-bottom: 2px solid var(--linha);
+}
+
+.marca {
+  margin: 0;
+  font-family: var(--pixel);
+  font-size: 0.875rem;
+  color: var(--verde);
+}
+
+.voltar {
+  color: var(--muted);
+  text-underline-offset: 4px;
+}
+
+.voltar:hover {
+  color: var(--ink);
+}
+
+/* ---------- conteúdo ---------- */
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.hero {
+  padding: clamp(3rem, 9vw, 6rem) 0 clamp(2rem, 6vw, 4rem);
+}
+
+.kicker {
+  margin: 0 0 1.25rem;
+  font-family: var(--pixel);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--laranja);
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 7vw, 3.5rem);
+  line-height: 1.3;
+}
+
+.lead {
+  max-width: 38rem;
+  margin: 1.75rem 0 0;
+  color: var(--muted);
+  font-size: 1.1875rem;
+}
+
+h2 {
+  margin: 0 0 1.5rem;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: 1rem;
+  color: var(--verde);
+}
+
+.jogos {
+  padding-bottom: clamp(3rem, 8vw, 5rem);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  align-items: start;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  background: var(--superficie);
+  border: 2px solid var(--linha-forte);
+}
+
+.capa {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 64 / 25;
+  object-fit: cover;
+  border-bottom: 2px solid var(--linha-forte);
+}
+
+.corpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.25rem;
+}
+
+h3 {
+  margin: 0.25rem 0 0.75rem;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.corpo p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.selo {
+  align-self: flex-start;
+  margin: 0 0 0.5rem;
+  padding: 0.2rem 0.6rem;
+  border: 2px solid var(--linha-forte);
+  font-family: var(--pixel);
+  font-size: 0.625rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* "No ar" usa o verde como fundo, com texto escuro (9,4). */
+.corpo .selo-ok {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: var(--sobre-verde);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin: auto 0 0;
+}
+
+.corpo .acoes {
+  margin-bottom: 0;
+}
+
+.botao {
+  display: inline-block;
+  padding: 0.65rem 1.25rem;
+  background: var(--verde);
+  color: var(--sobre-verde);
+  font-weight: 700;
+  text-decoration: none;
+  border: 2px solid var(--verde);
+}
+
+.botao:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.link {
+  text-underline-offset: 4px;
+}
+
+/* ---------- títulos trancados ---------- */
+
+.capa-trancada {
+  display: grid;
+  place-items: center;
+  background-color: var(--fundo);
+  background-image:
+    linear-gradient(var(--linha) 1px, transparent 1px),
+    linear-gradient(90deg, var(--linha) 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: var(--linha-forte);
+}
+
+.cadeado {
+  image-rendering: pixelated;
+}
+
+.trancado h3 {
+  color: var(--ink);
+}
+
+/* ---------- rodapé ---------- */
+
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding: 1.5rem var(--gutter);
+  border-top: 2px solid var(--linha);
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.rodape p {
+  margin: 0;
+}

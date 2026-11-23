@@ -1,0 +1,14 @@
+{
+  "name": "play-jm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Play JM — Sapo Pixelado: games and pixel art by Jonathan Mesquita. Static site, no build.",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.3",
+    "playwright": "1.63.0"
+  }
+}
