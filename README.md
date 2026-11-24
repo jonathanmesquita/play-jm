@@ -52,7 +52,11 @@ assets/
 │   ├── favicon.ico              16, 32, 48 e 64 px (o teste confere)
 │   ├── apple-touch-icon.png     180 px, fundo opaco (o iOS ignora transparência)
 │   └── controle-256.png         arte original, sem perda: de onde saem os outros tamanhos
-└── img/games/                   uma imagem por jogo (hoje: arriba-jump.webp, cortada do jogo)
+└── img/
+    ├── games/                   uma imagem por jogo (hoje: arriba-jump.webp, cortada do jogo)
+    └── og.png                   imagem social 1200x630 (gerada por `npm run og`)
+404.html                         a página "Game Over" (a Vercel a serve em endereço que não existe)
+scripts/og/                      og.html (o modelo) e render.mjs (gera assets/img/og.png)
 tests/site.test.mjs              Chromium + axe + CSP
 ```
 
@@ -120,9 +124,19 @@ deste repositório.
   com LANCZOS, porque a arte tem bordas suavizadas e não é pixel exato. Arte de terceiros só
   entra com licença e origem anotada.
 
+## Detalhes de jogo, sem enfeite à toa
+
+- **Placar no topo** ("No ar 2 · Em breve 3"): números reais, e um teste confere que batem com
+  os cartões, para o placar não ficar velho.
+- **Botões que afundam** ao apertar (sombra dura de 4 px que some), com três estados medidos em teste.
+- **404 "Game Over"** com a saída "Continuar", que não é indexada.
+- **Imagem social** para o link ficar bonito no WhatsApp e no LinkedIn. O modelo está em
+  `scripts/og/og.html`; depois de mudar o texto ou a arte, rode `npm run og`.
+- **Sem movimento automático** (nada pisca nem anima sozinho): o movimento é só ao passar o mouse
+  ou apertar, e some com `prefers-reduced-motion`.
+
 ## Roadmap
 
 - [ ] Destrancar cada título quando houver o que mostrar (um por vez), com o gênero dele.
 - [ ] Versão de 16 px do ícone desenhada à mão (hoje ela vira uma mancha laranja com um ponto verde).
-- [ ] Imagem social (`og:image`) da página.
 - [ ] Inglês, se a página ganhar público fora do Brasil.

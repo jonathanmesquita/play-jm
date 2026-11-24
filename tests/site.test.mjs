@@ -38,8 +38,9 @@ function servir() {
     const arquivo = path.join(RAIZ, caminho === "/" ? "index.html" : caminho);
     const permitido = !arquivo.includes("node_modules") && !/\/(tests|\.git)\//.test(arquivo);
     if (!arquivo.startsWith(RAIZ) || !permitido || !fs.existsSync(arquivo) || fs.statSync(arquivo).isDirectory()) {
-      res.writeHead(404);
-      return res.end("não encontrado");
+      const pagina404 = path.join(RAIZ, "404.html");
+      res.writeHead(404, { "Content-Type": TIPOS[".html"] });
+      return res.end(fs.existsSync(pagina404) ? fs.readFileSync(pagina404) : "não encontrado");
     }
     const cabecalhos = { "Content-Type": TIPOS[path.extname(arquivo)] ?? "application/octet-stream" };
     for (const regra of REGRAS) {
@@ -218,6 +219,89 @@ test("os filtros mostram só o que casa, escondem a fileira vazia e funcionam po
     await page.keyboard.press("ArrowRight");
     assert.ok(await page.locator("#f-live").isChecked(), "a seta para a direita deve selecionar o próximo filtro");
     assert.deepEqual(await visiveis(), ["Arriba Jump", "JJ — CONTINUE COMIGO"]);
+  } finally {
+    await context.close();
+  }
+});
+
+test("o placar do topo bate com os cartões", async () => {
+  const { page, context } = await abrir({ width: 1440, height: 900 });
+  try {
+    const placar = await page.locator(".placar li").evaluateAll((lis) =>
+      Object.fromEntries(lis.map((li) => [li.firstChild.textContent.trim(), Number(li.querySelector("strong").textContent)]))
+    );
+    const noAr = await page.locator('.titulo[data-tags~="live"]').count();
+    const emBreve = await page.locator('.titulo[data-tags~="locked"]').count();
+    assert.deepEqual(placar, { "No ar": noAr, "Em breve": emBreve }, "o placar não pode ficar velho quando um jogo muda de situação");
+    assert.equal(noAr + emBreve, await page.locator("article.cartao").count(), "todo cartão é 'live' ou 'locked'");
+  } finally {
+    await context.close();
+  }
+});
+
+test("a página 404 é o Game Over: status 404, sem indexar, com a saída de volta e sem violação do axe", async () => {
+  const resposta = await fetch(`${base}/essa-pagina-nao-existe`);
+  assert.equal(resposta.status, 404);
+  const html = await resposta.text();
+  assert.match(html, /<h1[^>]*>GAME OVER<\/h1>/);
+  assert.match(html, /<meta name="robots" content="noindex"/);
+  assert.ok(!/<script/i.test(html) && !/\sstyle=/i.test(html), "a 404 também não tem script nem estilo inline");
+
+  const context = await navegador.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    const page = await context.newPage();
+    const erros = [];
+    page.on("pageerror", (e) => erros.push(e.message));
+    await page.goto(`${base}/essa-pagina-nao-existe`);
+    await page.waitForSelector("h1");
+    assert.equal(await page.getByRole("link", { name: /Continuar/ }).getAttribute("href"), "/");
+    await page.evaluate(AXE);
+    const violacoes = await page.evaluate(async () => {
+      const r = await axe.run(document, { runOnly: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] });
+      return r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`);
+    });
+    assert.deepEqual(violacoes, []);
+    assert.deepEqual(erros, []);
+  } finally {
+    await context.close();
+  }
+});
+
+test("a imagem social existe com 1200x630 e as etiquetas de compartilhamento apontam para ela", async () => {
+  const html = await (await fetch(`${base}/`)).text();
+  const meta = (chave) => html.match(new RegExp(`<meta (?:property|name)="${chave}" content="([^"]*)"`))?.[1];
+  const imagem = "https://play.jm.dev.br/assets/img/og.png";
+  assert.equal(meta("og:image"), imagem);
+  assert.equal(meta("twitter:image"), imagem);
+  assert.equal(meta("twitter:card"), "summary_large_image");
+  assert.ok(meta("og:image:alt")?.length > 10, "a imagem social precisa de texto alternativo");
+
+  const resposta = await fetch(`${base}/assets/img/og.png`);
+  assert.equal(resposta.status, 200);
+  const png = Buffer.from(await resposta.arrayBuffer());
+  assert.equal(png.readUInt32BE(16), Number(meta("og:image:width")), "a largura declarada deve ser a do arquivo");
+  assert.equal(png.readUInt32BE(20), Number(meta("og:image:height")), "a altura declarada deve ser a do arquivo");
+  assert.equal([png.readUInt32BE(16), png.readUInt32BE(20)].join("x"), "1200x630");
+});
+
+test("os botões têm os três estados: repouso, mouse em cima e apertado (a sombra dura afunda)", async () => {
+  const { page, context } = await abrir({ width: 1440, height: 900 });
+  try {
+    const botao = page.locator(".destaque .botao-claro");
+    const estado = async () => {
+      await page.waitForTimeout(250); /* a transição dura 80 ms */
+      return botao.evaluate((e) => {
+        const [x, y] = (getComputedStyle(e).transform === "none" ? "matrix(1, 0, 0, 1, 0, 0)" : getComputedStyle(e).transform)
+          .match(/-?\d+(\.\d+)?/g).slice(4).map(Number);
+        return { x, y, sombra: getComputedStyle(e).boxShadow.match(/\d+px/g)?.slice(0, 2).join(" ") };
+      });
+    };
+    assert.deepEqual(await estado(), { x: 0, y: 0, sombra: "4px 4px" }, "repouso");
+    await botao.hover();
+    assert.deepEqual(await estado(), { x: -2, y: -2, sombra: "6px 6px" }, "mouse em cima: sobe");
+    await page.mouse.down();
+    assert.deepEqual(await estado(), { x: 4, y: 4, sombra: "0px 0px" }, "apertado: desce e a sombra some");
+    await page.mouse.up();
   } finally {
     await context.close();
   }
