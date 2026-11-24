@@ -136,6 +136,27 @@ a {
   color: var(--creme);
 }
 
+/* Placar: dois números reais do catálogo (um teste confere que batem com os cartões). */
+.placar {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--pixel);
+  font-size: 0.625rem;
+  line-height: 1.8;
+  color: var(--apagado);
+}
+
+.placar strong {
+  margin-left: 0.4rem;
+  font-weight: 400;
+  color: var(--argila-sobre-tinta);
+}
+
 /* ---------- conteúdo ---------- */
 
 main {
@@ -429,8 +450,21 @@ h3 {
   display: inline-block;
   padding: 0.65rem 1.25rem;
   border: 2px solid var(--creme);
+  box-shadow: 4px 4px 0 var(--argila);
   font-weight: 700;
   text-decoration: none;
+  transition: transform 0.08s steps(2), box-shadow 0.08s steps(2);
+}
+
+.botao:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--argila);
+}
+
+/* Apertar: o botão afunda até a sombra sumir, como um botão de verdade. */
+.botao:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--argila);
 }
 
 .botao-claro {
@@ -451,6 +485,36 @@ h3 {
 .botao-vazio:hover {
   background: var(--creme);
   color: var(--tinta);
+}
+
+/* ---------- página 404 ---------- */
+
+.fim {
+  padding: clamp(3rem, 12vw, 7rem) 0;
+  text-align: center;
+}
+
+.fim h1 {
+  margin: 0;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: clamp(2rem, 9vw, 4.5rem);
+  line-height: 1.3;
+}
+
+.fim p {
+  margin: 1.25rem auto 0;
+  max-width: 28rem;
+  color: var(--apagado);
+}
+
+.fim .kicker {
+  margin-bottom: 1.5rem;
+}
+
+.fim .acoes {
+  justify-content: center;
+  margin-top: 2.25rem;
 }
 
 /* ---------- rodapé ---------- */
